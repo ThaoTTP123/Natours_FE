@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Breadcrumb, Button, Layout, Menu, Row, theme } from 'antd';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../features/authSlice';
 const { Header, Content, Footer } = Layout;
 const AppLayout = () => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   return (
     <Layout className='layout'>
       <Header
@@ -40,14 +45,27 @@ const AppLayout = () => {
           />
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button>Login</Button>
-          <Button>Sign up</Button>
+          {!user ? (
+            <>
+              <Button onClick={() => navigate('/login')}>Login</Button>
+              <Button onClick={() => navigate('/signup')}>Sign up</Button>
+            </>
+          ) : (
+            <Button
+              onClick={() => {
+                dispatch(logout());
+                navigate('/');
+              }}
+            >
+              Logout
+            </Button>
+          )}
         </div>
       </Header>
       <Content
-        style={{
-          padding: '0 50px',
-        }}
+      // style={{
+      //   padding: '0 50px',
+      // }}
       >
         {/* <Breadcrumb
           style={{
@@ -57,14 +75,9 @@ const AppLayout = () => {
           <Breadcrumb.Item>Home</Breadcrumb.Item>
           <Breadcrumb.Item>Tour</Breadcrumb.Item>
         </Breadcrumb> */}
-        <Row
-          className='site-layout-content'
-          style={{
-            background: colorBgContainer,
-          }}
-        >
+        <div className='site-layout-content'>
           <Outlet />
-        </Row>
+        </div>
       </Content>
       <Footer
         style={{
