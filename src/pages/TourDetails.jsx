@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from '../api/axios';
-import { Avatar, Col, Row } from 'antd';
+import { redirect, useNavigate, useParams } from 'react-router-dom';
+import axios, { privateAxios } from '../api/axios';
+import { Avatar, Button, Col, Rate, Row } from 'antd';
+import TourMap from '../components/Map';
+import { useSelector } from 'react-redux';
 const OverviewBox = ({ icon, name, value }) => (
   <div
     style={{
@@ -26,12 +28,77 @@ const OverviewBox = ({ icon, name, value }) => (
     </div>
   </div>
 );
+const ReviewCard = ({ review }) => {
+  return (
+    <Row
+      style={{
+        width: '300px',
+        height: '250px',
+        backgroundColor: '#fff',
+        padding: '1rem',
+        scrollSnapAlign: 'center',
+        borderRadius: '5px',
+        boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.15)',
+        WebkitBoxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.15)',
+      }}
+    >
+      <Col span={24}>
+        <Row
+          gutter={50}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar
+            src={`img/users/${review.user.photo}`}
+            size={64}
+            style={{ marginRight: '1rem' }}
+          />
+          <p
+            style={{
+              fontSize: '1rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              color: '#777',
+            }}
+          >
+            {review.user.name}
+          </p>
+        </Row>
+      </Col>
+      <Col span={24}>
+        <Row>
+          <p
+            style={{
+              fontSize: '0.8rem',
+              marginBottom: '2rem',
+              fontStyle: 'italic',
+              fontWeight: 400,
+              color: '#999',
+            }}
+          >
+            {review.review}
+          </p>
+        </Row>
+      </Col>
+      <Col span={24}>
+        <Row style={{ display: 'flex', justifyContent: 'center' }}>
+          <Rate disabled defaultValue={review.rating} />
+        </Row>
+      </Col>
+    </Row>
+  );
+};
 export default function TourDetails() {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const { id } = useParams();
   const [tour, setTour] = useState(null);
   const fetchTour = async () => {
     const res = await axios.get(`tours/${id}`);
-    setTour(res.data.data.doc);
+    setTour(res.data.doc);
   };
   useEffect(() => {
     fetchTour();
@@ -224,7 +291,7 @@ export default function TourDetails() {
                 </svg>
               }
               name={'Participants'}
-              value={tour?.maxGroupSize}
+              value={tour?.maxGroupSize + ' ' + 'People'}
             />
             <OverviewBox
               icon={
@@ -239,7 +306,7 @@ export default function TourDetails() {
                 </svg>
               }
               name={'Rating'}
-              value={tour?.ratingsAverage}
+              value={tour?.ratingsAverage + '/5'}
             />
           </div>
           <div
@@ -267,6 +334,7 @@ export default function TourDetails() {
             </div>
             {tour?.guides.map((guide) => (
               <OverviewBox
+                key={guide._id}
                 icon={<Avatar src={`img/users/${guide.photo}`} size={64} />}
                 name={guide.role === 'lead-guide' ? 'Lead guide' : 'guide'}
                 value={guide.name}
@@ -329,45 +397,175 @@ export default function TourDetails() {
       <Row
         style={{
           display: ['-webkit-box', '-ms-flexbox', 'flex'],
-          clipPath: 'polygon(0 9vw, 100% 0, 100% calc(100% - 9vw), 0 100%)',
-          WebkitClipPath:
-            'polygon(0 9vw, 100% 0, 100% calc(100% - 9vw), 0 100%)',
           marginTop: 'calc(0px - 9vw)',
           position: 'relative',
           zIndex: 1000,
         }}
       >
-        {tour.images.map((pic, i) => (
-          <Col xs={24} md={8}>
+        {tour?.images.map((pic, i) => (
+          <Col xs={24} md={8} key={i}>
             <img
               src={`img/tours/${pic}`}
               style={{
                 width: '100%',
                 height: '110%',
-                paddingTop: i === 0 ? '15%' : '0',
-                paddingBottom: i === 1 ? '15%' : i === 2 ? '27%' : '',
+                paddingTop: '15%',
+                paddingBottom: '15%',
               }}
             />
           </Col>
         ))}
       </Row>
-      <Row
+      {/* Map Section */}
+      {/* <Row
         style={{
-          height: '20rem',
+          position: 'relative',
+          height: '50rem',
+          marginTop: '-9vw',
         }}
-      ></Row>
+      >
+        {tour?.locations && <TourMap locations={tour.locations} />}
+      </Row> */}
+      {/* Reviews List */}
       <Row
         style={{
           display: ['-webkit-box', '-ms-flexbox', 'flex'],
-          clipPath: 'polygon( 0 9vw, 100% 0, 100% calc(100% - 9vw), 0 100%)',
-          WebkitClipPath:
-            'polygon( 0 9vw, 100% 0, 100% calc(100% - 9vw), 0 100%)',
           position: 'relative',
-          height: '50rem',
-          marginTop: '-10rem',
+          marginTop: '-9vw',
           background: 'linear-gradient(to right bottom, #7dd56f, #28b487)',
+          padding: '3rem 0',
         }}
-      ></Row>
+      >
+        <div
+          style={{
+            padding: '5rem 2rem',
+            overflowX: 'scroll',
+            display: 'grid',
+            gridAutoFlow: 'column',
+            gap: '6rem',
+            scrollSnapType: 'x mandatory',
+            msScrollSnapType: 'mandatory',
+            scrollSnapAlign: 'center',
+          }}
+        >
+          {tour?.reviews.map((review) => (
+            <ReviewCard key={review._id} review={review} />
+          ))}
+        </div>
+      </Row>
+      {/* Booking Inviting */}
+      <Row
+        style={{
+          marginTop: '-9vw',
+          padding: '3rem',
+          paddingBottom: '11rem',
+          paddingTop: 'calc(10rem + 9vw)',
+          backgroundColor: '#f7f7f7',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '105rem',
+            minWidth: '70rem',
+            margin: '0 auto',
+            overflow: 'hidden',
+            backgroundColor: '#fff',
+            padding: '6rem 5rem ',
+            borderRadius: '2rem',
+            WebkitBoxShadow: '0 3rem 8rem 0.5rem rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 3rem 8rem 0.5rem rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              transform: 'translate(-15%, -30%)',
+            }}
+          >
+            <Avatar.Group size={150}>
+              <Avatar src='img/logo-green-round.png' style={{ zIndex: 3 }} />
+              <Avatar
+                src={`img/tours/${tour?.images[0]}`}
+                style={{
+                  marginLeft: '-75px',
+                  zIndex: 2,
+                  boxShadow: '1rem 0.5rem 3rem rgba(0, 0, 0, 0.15)',
+                }}
+              />
+              <Avatar
+                src={`img/tours/${tour?.images[1]}`}
+                style={{
+                  marginLeft: '-75px',
+                  zIndex: 1,
+                  boxShadow: '1rem 0.5rem 3rem rgba(0, 0, 0, 0.15)',
+                }}
+              />
+            </Avatar.Group>
+          </div>
+          <Row style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Col
+              span={19}
+              style={{
+                paddingLeft: '15rem',
+              }}
+            >
+              <h2
+                style={{
+                  textTransform: 'uppercase',
+                  fontWeight: 700,
+                  backgroundImage:
+                    'linear-gradient(to right, #7dd56f, #28b487)',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  letterSpacing: '0.1rem',
+                  lineHeight: 1.3,
+                  display: 'inline-block',
+                }}
+              >
+                What are you waiting for?
+              </h2>
+              <div style={{ fontWeight: 400, color: '#999' }}>
+                {tour?.duration} days. 1 adventure. Infinite memories. Make it
+                yours today!
+              </div>
+            </Col>
+            <Col span={5}>
+              <Button
+                type='primary'
+                shape='round'
+                style={{
+                  backgroundColor: '#55c57a',
+                  color: '#fff',
+                  width: '-webkit-fill-available',
+                  textTransform: 'uppercase',
+                  fontSize: '1rem',
+                  fontWeight: '400',
+                  height: '100%',
+                  padding: '8px 0',
+                }}
+                onClick={async () => {
+                  if (user) {
+                    try {
+                      const res = await privateAxios.get(
+                        `bookings/checkout-session/${tour._id}`
+                      );
+                      window.location.href = res.data.session.url;
+                    } catch (error) {
+                      // if (error.response.status === 401) navigate('/login');
+                      console.log(error);
+                    }
+                  }
+                  navigate(`/login?booking`, { state: { tourId: tour._id } });
+                }}
+              >
+                {user ? 'Book tour now!' : 'Login for booking!'}
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      </Row>
     </>
   );
 }

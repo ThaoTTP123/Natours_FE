@@ -5,7 +5,7 @@ export const isLoggedIn = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get('users/is-logged-in');
-      return res.data.user;
+      return res.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -24,7 +24,7 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
   try {
     const res = await axios.post('users/login', user);
-    return res.data.data.user;
+    return res.data;
   } catch (error) {
     const message =
       (error.response && error.response.data && error.response.data.message) ||
@@ -36,6 +36,7 @@ export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
+    token: null,
     user: null,
     isLoading: false,
     isError: false,
@@ -60,7 +61,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -69,9 +71,11 @@ const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
+        state.token = null;
       })
       .addCase(isLoggedIn.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
       })
       .addCase(isLoggedIn.rejected, (state) => {
         // state.user = null;

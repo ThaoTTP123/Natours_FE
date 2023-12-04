@@ -1,37 +1,49 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox } from 'antd';
-import { UserOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import {
+  UserOutlined,
+  LockOutlined,
+  SafetyOutlined,
+  MailOutlined,
+} from '@ant-design/icons';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from '../api/axios';
+import { isLoggedIn } from '../features/authSlice';
+const containerStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100vh',
+  backgroundColor: '#55c57a', // Primary color
+};
+
+const formStyle = {
+  maxWidth: '400px',
+  width: '100%',
+  backgroundColor: 'white',
+  padding: '20px',
+  borderRadius: '8px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+};
 const Signup = () => {
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  if (user) return <Navigate to={'/'} replace />;
 
-  const containerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    backgroundColor: '#55c57a', // Primary color
-  };
-
-  const formStyle = {
-    maxWidth: '300px',
-    width: '100%',
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  };
-  const onFinish = (values) => {
-    // Simulating a login request (replace with actual authentication logic)
-    if (values.username === 'demo' && values.password === 'password') {
-      console.log('Login successful!');
-      setError(null);
-    } else {
-      console.log('Login failed!');
-      setError('Invalid username or password');
+  const onFinish = async (values) => {
+    try {
+      const res = await axios.post('users/signup', values);
+      dispatch(isLoggedIn());
+      navigate('/');
+    } catch (error) {
+      if (error.response.data.err.code === 11000)
+        setError('User with this email has been created!');
+      else setError('An error has occurred. Please try again later!');
     }
   };
-
   return (
     <div style={containerStyle}>
       <Form
@@ -41,12 +53,27 @@ const Signup = () => {
         onFinish={onFinish}
       >
         <Form.Item
-          name='username'
-          rules={[{ required: true, message: 'Please input your Username!' }]}
+          name='name'
+          rules={[{ required: true, message: 'Please input your Email!' }]}
         >
           <Input
             prefix={<UserOutlined style={{ color: '#55c57a' }} />}
-            placeholder='Username'
+            placeholder='Your Full Name'
+          />
+        </Form.Item>
+        <Form.Item
+          name='email'
+          rules={[
+            { required: true, message: 'Please input your Email!' },
+            {
+              type: 'email',
+              message: 'The input is not valid E-mail!',
+            },
+          ]}
+        >
+          <Input
+            prefix={<MailOutlined style={{ color: '#55c57a' }} />}
+            placeholder='Email'
           />
         </Form.Item>
         <Form.Item
@@ -61,7 +88,19 @@ const Signup = () => {
         </Form.Item>
         <Form.Item
           name='passwordConfirm'
-          rules={[{ required: true, message: 'Please confirm your password!' }]}
+          rules={[
+            { required: true, message: 'Please confirm your password!' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error('The new password that you entered do not match!')
+                );
+              },
+            }),
+          ]}
         >
           <Input
             prefix={<SafetyOutlined style={{ color: '#55c57a' }} />}
