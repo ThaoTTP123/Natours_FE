@@ -10,7 +10,7 @@ const items = [
   },
   {
     key: '2',
-    label: <Link to='/history'>Booked Tour</Link>,
+    label: <Link to='/history'>Your Tour</Link>,
   },
   {
     key: '3',
@@ -60,12 +60,22 @@ const AppLayout = () => {
         <div style={{ display: 'flex', gap: '10px' }}>
           {!user ? (
             <>
-              <Button onClick={() => navigate('/login')}>Login</Button>
-              <Button onClick={() => navigate('/signup')}>Sign up</Button>
+              <Button
+                style={{ backgroundColor: 'white' }}
+                onClick={() => navigate('/login')}
+              >
+                Login
+              </Button>
+              <Button
+                style={{ backgroundColor: 'white' }}
+                onClick={() => navigate('/signup')}
+              >
+                Sign up
+              </Button>
             </>
           ) : (
-            <Dropdown menu={{ items }} icon={<></>}>
-              <Button shape='circle'>
+            <Dropdown menu={{ items }}>
+              <Button shape='circle' className='bg-white flex justify-center'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   height='100%'

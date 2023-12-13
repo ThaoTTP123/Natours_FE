@@ -21,6 +21,7 @@ export const privateAxios = axios.create({
 privateAxios.interceptors.request.use(
   function (config) {
     const token = store.getState().auth.token;
+    console.log(token);
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },

@@ -1,5 +1,54 @@
-import React from 'react';
+import { Button, Form, Input, Skeleton } from 'antd';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import AvatarUpload from '../components/AvatarUpload';
+import { privateAxios } from '../api/axios';
 
 export default function Profile() {
-  return <div>Profile</div>;
+  const { user, isSuccess } = useSelector((state) => state.auth);
+  const onFinish = async (values) => {
+    const formData = new FormData();
+    Object.entries(values).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    await privateAxios.patch('users/update-me', formData);
+  };
+  if (!isSuccess) return <Skeleton />;
+  return (
+    <div className='w-[70vw] min-h-[400px] bg-white m-auto mt-5 p-6'>
+      <div className='flex justify-between items-center'>
+        <div>
+          <AvatarUpload photo={user?.photo} />
+        </div>
+      </div>
+      <Form
+        className='w-full'
+        layout='vertical'
+        initialValues={{
+          name: user.name,
+          email: user.email,
+        }}
+        onFinish={onFinish}
+      >
+        <Form.Item
+          name={'name'}
+          rules={[{ required: true, message: 'Please enter your name' }]}
+          label='Name'
+          // initialValue={user?.name}
+        >
+          <Input type='text' placeholder='name' />
+        </Form.Item>
+        <Form.Item
+          name={'email'}
+          rules={[{ required: true, message: 'Please enter your email' }]}
+          label='Email'
+        >
+          <Input type='text' placeholder='email' />
+        </Form.Item>
+        <Form.Item>
+          <Button htmlType='submit'>Update Info</Button>
+        </Form.Item>
+      </Form>
+    </div>
+  );
 }

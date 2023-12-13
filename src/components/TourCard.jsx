@@ -1,6 +1,7 @@
 import { Button, Card, Col, Row } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppButton from './AppButton';
 
 export default function TourCard({ tour }) {
   const navigate = useNavigate();
@@ -179,7 +180,7 @@ export default function TourCard({ tour }) {
           </Row>
         </Col>
         <Col span={12}>
-          <Button
+          {/* <Button
             shape='round'
             type='primary'
             style={{
@@ -192,7 +193,10 @@ export default function TourCard({ tour }) {
             onClick={() => navigate(tour._id)}
           >
             Details
-          </Button>
+          </Button> */}
+          <AppButton handleOnclick={() => navigate(tour._id)}>
+            Details
+          </AppButton>
         </Col>
       </Row>
     </div>

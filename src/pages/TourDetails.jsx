@@ -4,6 +4,7 @@ import axios, { privateAxios } from '../api/axios';
 import { Avatar, Button, Col, Rate, Row } from 'antd';
 import TourMap from '../components/Map';
 import { useSelector } from 'react-redux';
+import AppButton from '../components/AppButton';
 const OverviewBox = ({ icon, name, value }) => (
   <div
     style={{
@@ -532,20 +533,13 @@ export default function TourDetails() {
               </div>
             </Col>
             <Col span={5}>
-              <Button
-                type='primary'
-                shape='round'
-                style={{
-                  backgroundColor: '#55c57a',
-                  color: '#fff',
+              <AppButton
+                styles={{
                   width: '-webkit-fill-available',
-                  textTransform: 'uppercase',
-                  fontSize: '1rem',
-                  fontWeight: '400',
-                  height: '100%',
                   padding: '8px 0',
+                  fontWeight: '400',
                 }}
-                onClick={async () => {
+                handleOnclick={async () => {
                   if (user) {
                     try {
                       const res = await privateAxios.get(
@@ -561,7 +555,7 @@ export default function TourDetails() {
                 }}
               >
                 {user ? 'Book tour now!' : 'Login for booking!'}
-              </Button>
+              </AppButton>
             </Col>
           </Row>
         </div>
