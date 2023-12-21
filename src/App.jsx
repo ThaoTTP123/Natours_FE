@@ -5,7 +5,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { useEffect } from 'react';
 import { isLoggedIn } from './features/authSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import TourDetails from './pages/TourDetails';
 import Logout from './pages/Logout';
 import Profile from './pages/Profile';

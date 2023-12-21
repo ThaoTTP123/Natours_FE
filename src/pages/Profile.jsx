@@ -1,17 +1,20 @@
 import { Button, Form, Input, Skeleton } from 'antd';
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AvatarUpload from '../components/AvatarUpload';
 import { privateAxios } from '../api/axios';
+import { isLoggedIn } from '../features/authSlice';
 
 export default function Profile() {
   const { user, isSuccess } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const onFinish = async (values) => {
     const formData = new FormData();
     Object.entries(values).forEach(([key, value]) => {
       formData.append(key, value);
     });
     await privateAxios.patch('users/update-me', formData);
+    dispatch(isLoggedIn());
   };
   if (!isSuccess) return <Skeleton />;
   return (

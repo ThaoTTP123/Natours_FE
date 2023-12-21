@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { message, Upload } from 'antd';
 import { privateAxios } from '../api/axios';
+// const BASE_URL='http://localhost:3000/img/users/'
+const BASE_URL = 'https://natours-api-com.onrender.com//img/users/';
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener('load', () => callback(reader.result));
@@ -24,10 +26,7 @@ const beforeUpload = (file) => {
 };
 const AvatarUpload = ({ photo }) => {
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState(
-    // `http://localhost:3000/img/users/${photo}`
-    null
-  );
+  const [imageUrl, setImageUrl] = useState(`${BASE_URL}${photo}`);
   const handleChange = async (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true);

@@ -1,13 +1,8 @@
 import axios from 'axios';
 
-// const BASE_URL = 'https://natours-api-com.onrender.com/api/v1/';
-const BASE_URL = 'http://127.0.0.1:3000/api/v1/';
-let store;
-
-export const injectStore = (_store) => {
-  store = _store;
-};
-
+const BASE_URL = 'https://natours-api-com.onrender.com/api/v1/';
+// const BASE_URL = 'http://127.0.0.1:3000/api/v1/';
+let token;
 export default axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -16,12 +11,15 @@ export const privateAxios = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
-
+export const getToken = async () => {
+  const res = await axios.get(BASE_URL + 'users/is-logged-in', {
+    withCredentials: true,
+  });
+  token = res.data.token;
+};
 // Add a request interceptor
 privateAxios.interceptors.request.use(
-  function (config) {
-    const token = store.getState().auth.token;
-    console.log(token);
+  async function (config) {
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },

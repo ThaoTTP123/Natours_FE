@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { redirect, useNavigate, useParams } from 'react-router-dom';
-import axios, { privateAxios } from '../api/axios';
-import { Avatar, Button, Col, Rate, Row } from 'antd';
+import axios, { getToken, privateAxios } from '../api/axios';
+import { Avatar, Button, Col, Rate, Row, Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import TourMap from '../components/Map';
 import { useSelector } from 'react-redux';
 import AppButton from '../components/AppButton';
@@ -97,6 +98,7 @@ export default function TourDetails() {
   const { user } = useSelector((state) => state.auth);
   const { id } = useParams();
   const [tour, setTour] = useState(null);
+  const [bookLoading, setBookLoading] = useState(false);
   const fetchTour = async () => {
     const res = await axios.get(`tours/${id}`);
     setTour(res.data.doc);
@@ -540,21 +542,35 @@ export default function TourDetails() {
                   fontWeight: '400',
                 }}
                 handleOnclick={async () => {
+                  setBookLoading(true);
                   if (user) {
                     try {
-                      const res = await privateAxios.get(
-                        `bookings/checkout-session/${tour._id}`
-                      );
-                      window.location.href = res.data.session.url;
+                      getToken().then(async () => {
+                        const res = await privateAxios.get(
+                          `bookings/checkout-session/${tour._id}`
+                        );
+                        setBookLoading(false);
+                        window.location.href = res.data.session.url;
+                      });
                     } catch (error) {
                       // if (error.response.status === 401) navigate('/login');
                       console.log(error);
                     }
-                  }
-                  navigate(`/login?booking`, { state: { tourId: tour._id } });
+                  } else
+                    navigate(`/login?booking`, { state: { tourId: tour._id } });
                 }}
               >
                 {user ? 'Book tour now!' : 'Login for booking!'}
+                {bookLoading && (
+                  <Spin
+                    indicator={
+                      <LoadingOutlined
+                        className='text-[20px] text-white ml-2'
+                        spin
+                      />
+                    }
+                  />
+                )}
               </AppButton>
             </Col>
           </Row>
